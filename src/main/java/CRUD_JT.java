@@ -21,6 +21,24 @@ public class CRUD_JT {
     // Завантажуємо бібліотеку через JNR-FFI
     private static MyRustLib lib = LibraryLoader.create(MyRustLib.class).load("store_jt_x86_64");
 
+
+    // private static LRUCache cache = new LRUCache(value -> {
+    //   lib.__read(value);
+    // } );
+    // cache = new LRUCache(value -> lib.__read);
+    // private static final LRUCache cache;
+
+    // static {
+    //   cache = new LRUCache(value -> lib.__read);
+    // }
+
+    private static final LRUCache lru_cache;
+
+    static { lru_cache = new LRUCache(value -> {
+      // System.out.println(value);
+      return lib.__read(value);
+    }); }
+
     // encrypted_key метод для роботи з кешем
     public static void encrypted_key(String encrypted_key) {
         lib.encrypted_key(encrypted_key);
@@ -32,29 +50,49 @@ public class CRUD_JT {
         byte[] packedData = pack(hash);
 
         // Викликаємо нативний метод Rust через JNR-FFI
-        return lib.__create(packedData, packedData.length, ttl, silence_read);
+        String token = lib.__create(packedData, packedData.length, ttl, silence_read);
+
+        lru_cache.insert(token, hash, ttl, silence_read);
+
+        return token;
     }
 
     // w метод для роботи з кешем
     public static Map<String, Object> read(String token) {
-        // return lib.__read(token);
+        Map<String, Object> output = lru_cache.get(token);
+        if (output != null) {
+          return output;
+        }
+
         String str = lib.__read(token);
         if (str.isEmpty()) {
             return null;
         }
 
         Map<String, Object> result = new JSONObject(str).toMap();
-        return result.size() > 0 ? result : null;
+
+        if (result.size() > 0) {
+          lru_cache.forceInsert(token, result);
+          return result;
+        } else {
+          return null;
+        }
     }
 
     // e метод, який пакує HashMap і передає її в Rust
     public static boolean update(String token, Map<String, Object> hash, int ttl, int silence_read) throws IOException {
         byte[] packedData = pack(hash);
-        return lib.__update(token, packedData, packedData.length, ttl, silence_read);
+        boolean result = lib.__update(token, packedData, packedData.length, ttl, silence_read);
+
+        if (result) {
+          lru_cache.insert(token, hash, ttl, silence_read);
+        }
+        return result;
     }
 
     // r метод
     public static boolean delete(String token) {
+        lru_cache.delete(token);
         return lib.__delete(token);
     }
 

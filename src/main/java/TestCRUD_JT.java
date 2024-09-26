@@ -14,9 +14,30 @@ import java.util.List;
 
 import java.io.IOException;
 
+import java.util.Objects;
+
 public class TestCRUD_JT {
     public static final int REQUESTS = 40_000;
     private static final int READY_FOR_CACHE = 2;
+
+    public static Map<String, Object> sortMapRecursively(Map<String, Object> map) {
+        TreeMap<String, Object> sortedMap = new TreeMap<>();
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object value = entry.getValue();
+
+            if (value instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> nestedMap = (Map<String, Object>) value;
+                sortedMap.put(entry.getKey(), sortMapRecursively(nestedMap));
+            } else {
+                sortedMap.put(entry.getKey(), value);
+            }
+        }
+
+        return sortedMap;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("OS: " + System.getProperty("os.name"));
         System.out.println("CPU: " + System.getProperty("os.arch"));
@@ -77,6 +98,7 @@ public class TestCRUD_JT {
         for (int i = 0; i < silence_read; i++) {
             System.out.println(new TreeMap<>(CRUD_JT.read(tokenWithsilence_read)).toString().equals(
                     new TreeMap<>(Map.of("metadata", Map.of("silence_read", expectedsilence_read), "data", data)).toString()));
+
             expectedsilence_read--;
         }
         System.out.println(CRUD_JT.read(tokenWithsilence_read) == null);
@@ -90,8 +112,11 @@ public class TestCRUD_JT {
         expectedttl = ttl;
         expectedsilence_read = silence_read - 1;
         for (int i = 0; i < silence_read; i++) {
-            System.out.println(new TreeMap<>(CRUD_JT.read(tokenWithttlAndsilence_read)).toString().equals(
-                    new TreeMap<>(new TreeMap<>(Map.of("metadata", new TreeMap<>(Map.of("ttl", expectedttl, "silence_read", expectedsilence_read)), "data", data))).toString()));
+            Map<String,Object> originalMap = CRUD_JT.read(tokenWithttlAndsilence_read);
+            Map<String, Object> sortedMap = sortMapRecursively(originalMap);
+            Map<String, Object> expectedMap = new TreeMap<>(Map.of("metadata", new TreeMap<>(Map.of("ttl", expectedttl, "silence_read", expectedsilence_read)), "data", data));
+
+            System.out.println(sortedMap.toString().equals(expectedMap.toString()));
             expectedttl--;
             expectedsilence_read--;
             TimeUnit.SECONDS.sleep(1);
@@ -157,7 +182,6 @@ public class TestCRUD_JT {
         // when cached on read
         List<String> previusValues = new ArrayList<>();
 
-        // Перший цикл: зберігаємо значення в previusValues
         for (int i = 0; i < REQUESTS; i++) {
             previusValues.add(CRUD_JT.create(data, -1, -1));
         }
