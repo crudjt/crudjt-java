@@ -12,9 +12,9 @@ public class CRUD_JT {
     // Інтерфейс до нативної Rust бібліотеки
     public interface MyRustLib {
         void encrypted_key(String token);
-        String __create(byte[] buffer, long size, int ttl, int silence_read);
+        String __create(byte[] buffer, long size, long ttl, long silence_read);
         String __read(String token);
-        boolean __update(String token, byte[] buffer, long size, int ttl, int silence_read);
+        boolean __update(String token, byte[] buffer, long size, long ttl, long silence_read);
         boolean __delete(String token);
     }
 
@@ -45,7 +45,16 @@ public class CRUD_JT {
     }
 
     // q метод, який пакує HashMap у байти та викликає __create
-    public static String create(Map<String, Object> hash, int ttl, int silence_read) throws IOException {
+    public static String create(Map<String, Object> hash, long ttl, long silence_read) throws IOException {
+      // System.out.println(ttl);
+      // try {
+      //     Validation.validateInsertion(hash, ttl, silence_read);
+      //     System.out.println("Validation passed.");
+      // } catch (IllegalArgumentException e) {
+      //     System.err.println("Validation failed: " + e.getMessage());
+      // }
+        Validation.validateInsertion(hash, ttl, silence_read);
+
         // Пакуємо дані через MessagePack
         byte[] packedData = pack(hash);
 
@@ -80,7 +89,7 @@ public class CRUD_JT {
     }
 
     // e метод, який пакує HashMap і передає її в Rust
-    public static boolean update(String token, Map<String, Object> hash, int ttl, int silence_read) throws IOException {
+    public static boolean update(String token, Map<String, Object> hash, long ttl, long silence_read) throws IOException {
         byte[] packedData = pack(hash);
         boolean result = lib.__update(token, packedData, packedData.length, ttl, silence_read);
 

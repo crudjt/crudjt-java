@@ -66,10 +66,10 @@ public class TestCRUD_JT {
 
         // with ttl
         System.out.println("Checking ttl...");
-        int ttl = 5;
+        long ttl = 5;
         String tokenWithttl = CRUD_JT.create(data, ttl, -1);
 
-        int expectedttl = ttl;
+        long expectedttl = ttl;
         for (int i = 0; i < ttl; i++) {
             System.out.println(new TreeMap<>(CRUD_JT.read(tokenWithttl)).toString().equals(
                     new TreeMap<>(Map.of("metadata", Map.of("ttl", expectedttl), "data", data)).toString()));
@@ -91,10 +91,10 @@ public class TestCRUD_JT {
 
         // with silence_read
         System.out.println("Checking silence_read...");
-        int silence_read = 6;
+        long silence_read = 6;
         String tokenWithsilence_read = CRUD_JT.create(data, -1, silence_read);
 
-        int expectedsilence_read = silence_read - 1;
+        long expectedsilence_read = silence_read - 1;
         for (int i = 0; i < silence_read; i++) {
             System.out.println(new TreeMap<>(CRUD_JT.read(tokenWithsilence_read)).toString().equals(
                     new TreeMap<>(Map.of("metadata", Map.of("silence_read", expectedsilence_read), "data", data)).toString()));

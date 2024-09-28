@@ -47,7 +47,7 @@ public class LRUCache {
             }
 
             if (metadata != null && metadata.containsKey("silence_read")) {
-                int silence_read = (int) metadata.get("silence_read") - 1;
+                long silence_read = (long) metadata.get("silence_read") - 1;
                 output.putIfAbsent("metadata", new LinkedHashMap<>());
                 ((Map<String, Object>) output.get("metadata")).put("silence_read", silence_read);
 
@@ -73,7 +73,7 @@ public class LRUCache {
         return null;
     }
 
-    public void insert(String key, Object token, long ttl, int silence_read) {
+    public void insert(String key, Object token, long ttl, long silence_read) {
         Map<String, Object> hash = new LinkedHashMap<>();
         hash.put("data", token);
 
