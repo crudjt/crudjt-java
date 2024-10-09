@@ -1,7 +1,10 @@
 plugins {
     id 'java'
-    id 'application'
+    id 'maven-publish'
 }
+
+group = 'com.github'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -17,7 +20,25 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-application {
-    mainClass = 'TestCRUD_JT'  // Головний клас Java
-    applicationDefaultJvmArgs = ['-Djava.library.path=/Users/macintosh/Applications/']
+jar {
+    manifest {
+        attributes(
+            'Implementation-Title': 'CRUD_JT Library',
+            'Implementation-Version': version,
+            'Main-Class': 'CRUD_JT'
+        )
+    }
+
+    from('src/main/resources') {
+        into('/')  // Копіюємо файли ресурсів у корінь jar
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'crud_jt-java'
+        }
+    }
 }

@@ -8,6 +8,13 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class CRUD_JT {
     // Інтерфейс до нативної Rust бібліотеки
     public interface MyRustLib {
@@ -18,19 +25,87 @@ public class CRUD_JT {
         boolean __delete(String token);
     }
 
-    // Завантажуємо бібліотеку через JNR-FFI
-    private static MyRustLib lib = LibraryLoader.create(MyRustLib.class).load("store_jt_x86_64");
+    private static String osName = System.getProperty("os.name").toLowerCase();
+    private static String osArch = System.getProperty("os.arch").toLowerCase();
+    private static MyRustLib lib;
 
+    static {
+        try {
+            File tempFile = loadNativeLibrary();  // Завантажуємо бібліотеку у тимчасовий файл
+            lib = LibraryLoader.create(MyRustLib.class).load(tempFile.getAbsolutePath());  // Завантажуємо з правильним шляхом
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load native library", e);
+        }
+    }
 
-    // private static LRUCache cache = new LRUCache(value -> {
-    //   lib.__read(value);
-    // } );
-    // cache = new LRUCache(value -> lib.__read);
-    // private static final LRUCache cache;
+    private static File loadNativeLibrary() throws IOException {
+        String libPath = getLibraryPath();
+        InputStream inputStream = CRUD_JT.class.getResourceAsStream(libPath);
 
-    // static {
-    //   cache = new LRUCache(value -> lib.__read);
-    // }
+        if (inputStream == null) {
+            throw new IOException("Cannot find the library file in resources: " + libPath);
+        }
+
+        // Створюємо тимчасовий файл для бібліотеки
+        File tempFile = File.createTempFile("store_jt", getLibraryExtension());
+        tempFile.deleteOnExit(); // Видалення файлу при завершенні програми
+
+        try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+        }
+
+        // Повертаємо шлях до тимчасового файлу
+        return tempFile;
+    }
+
+    private static String getLibraryPath() {
+        String osFolder;
+        String archFolder;
+
+        // Визначаємо папку для ОС
+        if (osName.contains("win")) {
+            osFolder = "windows";
+        } else if (osName.contains("mac")) {
+            osFolder = "macos";
+        } else if (osName.contains("nux")) {
+            osFolder = "linux";
+        } else {
+            throw new UnsupportedOperationException("Unsupported operating system: " + osName);
+        }
+
+        // Визначаємо папку для архітектури
+        if (osArch.contains("arm")) {
+            archFolder = "arm64";
+        } else if (osArch.contains("64")) {
+            archFolder = "x86_64";
+        } else {
+            throw new UnsupportedOperationException("Unsupported architecture: " + osArch);
+        }
+
+        // Повертаємо шлях до бібліотеки
+        return "/native/" + osFolder + "/store_jt_" + archFolder + getLibraryExtension();
+    }
+
+    private static String getLibraryExtension() {
+        if (osName.contains("win")) {
+            return ".dll";
+        } else if (osName.contains("mac")) {
+            return ".dylib";
+        } else if (osName.contains("nux")) {
+            return ".so";
+        } else {
+            throw new UnsupportedOperationException("Unsupported operating system: " + osName);
+        }
+    }
+
+    // Метод для використання бібліотеки
+    public static MyRustLib getLib() {
+        return lib;
+    }
 
     private static final LRUCache lru_cache;
 
@@ -46,13 +121,6 @@ public class CRUD_JT {
 
     // q метод, який пакує HashMap у байти та викликає __create
     public static String create(Map<String, Object> hash, long ttl, long silence_read) throws IOException {
-      // System.out.println(ttl);
-      // try {
-      //     Validation.validateInsertion(hash, ttl, silence_read);
-      //     System.out.println("Validation passed.");
-      // } catch (IllegalArgumentException e) {
-      //     System.err.println("Validation failed: " + e.getMessage());
-      // }
         Validation.validateInsertion(hash, ttl, silence_read);
 
         // Пакуємо дані через MessagePack
@@ -117,16 +185,8 @@ public class CRUD_JT {
         return packer.toByteArray();
     }
 
-    // lib.encrypted_key("Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsiasdfOHR2dciYiwmaYq98l3tG8h9yXVCxg==");
-
     // // Приклад основного методу для тестування
     public static void main(String[] args) throws IOException {
         lib.encrypted_key("Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg==");
-
-        // // Тест для q методу
-        // Map<String, Object> testMap = new HashMap<>();
-        // testMap.put("key", "token");
-        // String result = create(testMap, -1, -1);
-        // System.out.println("Result from create: " + result);
     }
 }
