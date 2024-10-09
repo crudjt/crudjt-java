@@ -15,6 +15,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+import org.json.JSONException;
+
 public class CRUD_JT {
     // Інтерфейс до нативної Rust бібліотеки
     public interface MyRustLib {
@@ -78,9 +83,9 @@ public class CRUD_JT {
         }
 
         // Визначаємо папку для архітектури
-        if (osArch.contains("arm")) {
+        if (Pattern.compile("arm64|aarch").matcher(osArch).find()) {
             archFolder = "arm64";
-        } else if (osArch.contains("64")) {
+        } else if (Pattern.compile("x86_64|x64|amd64").matcher(osArch).find()) {
             archFolder = "x86_64";
         } else {
             throw new UnsupportedOperationException("Unsupported architecture: " + osArch);
@@ -92,7 +97,8 @@ public class CRUD_JT {
 
     private static String getLibraryExtension() {
         if (osName.contains("win")) {
-            return ".dll";
+            // return ".dll";
+            throw new UnsupportedOperationException("Unsupported operating system: " + osName);
         } else if (osName.contains("mac")) {
             return ".dylib";
         } else if (osName.contains("nux")) {

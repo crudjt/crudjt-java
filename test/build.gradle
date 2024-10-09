@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+    id 'application'  // Додаємо плагін для запуску програми
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()  // Підключаємо локальний Maven репозиторій
+}
+
+dependencies {
+    implementation 'com.github:crud_jt-java:1.0.0'
+}
+
+application {
+    mainClass = 'TestCRUD_JT'  // Головний клас Java
+}
