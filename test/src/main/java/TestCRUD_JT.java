@@ -37,6 +37,10 @@ public class TestCRUD_JT {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        CRUD_JT.Config
+            .encrypted_key("Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg==")
+            .start();
+
         System.out.println("OS: " + System.getProperty("os.name"));
         System.out.println("CPU: " + System.getProperty("os.arch"));
 

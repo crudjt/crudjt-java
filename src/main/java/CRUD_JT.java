@@ -23,16 +23,19 @@ import org.json.JSONException;
 public class CRUD_JT {
     // Інтерфейс до нативної Rust бібліотеки
     public interface MyRustLib {
-        void encrypted_key(String token);
+        // void encrypted_key(String token);
         String __create(byte[] buffer, long size, long ttl, long silence_read);
         String __read(String token);
         boolean __update(String token, byte[] buffer, long size, long ttl, long silence_read);
         boolean __delete(String token);
+
+        void __encrypted_key(String value);
+        void __store_jt_path(String value);
     }
 
     private static String osName = System.getProperty("os.name").toLowerCase();
     private static String osArch = System.getProperty("os.arch").toLowerCase();
-    private static MyRustLib lib;
+    private static final MyRustLib lib;
 
     static {
         try {
@@ -120,11 +123,6 @@ public class CRUD_JT {
       return lib.__read(value);
     }); }
 
-    // encrypted_key метод для роботи з кешем
-    public static void encrypted_key(String encrypted_key) {
-        lib.encrypted_key(encrypted_key);
-    }
-
     // q метод, який пакує HashMap у байти та викликає __create
     public static String create(Map<String, Object> hash, long ttl, long silence_read) throws IOException {
         Validation.validateInsertion(hash, ttl, silence_read);
@@ -148,7 +146,7 @@ public class CRUD_JT {
         }
 
         String str = lib.__read(token);
-        if (str.isEmpty()) {
+        if (str == null) {
             return null;
         }
 
@@ -179,6 +177,32 @@ public class CRUD_JT {
         return lib.__delete(token);
     }
 
+    public static class Config {
+        private static String encrypted_key;
+        private static String store_jt_path;
+
+        public static Config encrypted_key(String value) {
+            encrypted_key = value;
+            return ConfigHolder.INSTANCE;
+        }
+
+        public static Config store_jt_path(String value) {
+            store_jt_path = value;
+            return ConfigHolder.INSTANCE;
+        }
+
+        public static void start() {
+            if (store_jt_path != null) lib.__store_jt_path(store_jt_path);
+            if (encrypted_key != null) lib.__encrypted_key(encrypted_key);
+        }
+
+        // Трюк для повернення "self" у стилі builder
+        private static class ConfigHolder {
+            private static final Config INSTANCE = new Config();
+        }
+    }
+
+
     // Допоміжний метод для пакування HashMap у байти
     private static byte[] pack(Map<String, Object> map) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
@@ -191,8 +215,8 @@ public class CRUD_JT {
         return packer.toByteArray();
     }
 
-    // // Приклад основного методу для тестування
-    public static void main(String[] args) throws IOException {
-        lib.encrypted_key("Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg==");
-    }
+    // // // Приклад основного методу для тестування
+    // public static void main(String[] args) throws IOException {
+    //     lib.encrypted_key("Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg==");
+    // }
 }
