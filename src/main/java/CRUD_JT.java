@@ -29,8 +29,7 @@ public class CRUD_JT {
         boolean __update(String token, byte[] buffer, long size, long ttl, long silence_read);
         boolean __delete(String token);
 
-        void __encrypted_key(String value);
-        void __store_jt_path(String value);
+        String start_store_jt(String encrypted_key, String store_jt_path);
     }
 
     private static String osName = System.getProperty("os.name").toLowerCase();
@@ -125,21 +124,36 @@ public class CRUD_JT {
 
     // q метод, який пакує HashMap у байти та викликає __create
     public static String create(Map<String, Object> hash, long ttl, long silence_read) throws IOException {
+      if (!Config.wasStarted()) {
+          throw new RuntimeException(
+              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+          );
+        }
+
         Validation.validateInsertion(hash, ttl, silence_read);
 
         // Пакуємо дані через MessagePack
         byte[] packedData = pack(hash);
+        Validation.validateHashBytesize(packedData.length);
 
         // Викликаємо нативний метод Rust через JNR-FFI
         String token = lib.__create(packedData, packedData.length, ttl, silence_read);
+        if (token == null) {
+            throw new InternalError("Something went wrong. Ups");
+        }
 
         lru_cache.insert(token, hash, ttl, silence_read);
 
         return token;
     }
 
-    // w метод для роботи з кешем
     public static Map<String, Object> read(String token) {
+      if (!Config.wasStarted()) {
+          throw new RuntimeException(
+              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+          );
+        }
+
         Map<String, Object> output = lru_cache.get(token);
         if (output != null) {
           return output;
@@ -152,17 +166,33 @@ public class CRUD_JT {
 
         Map<String, Object> result = new JSONObject(str).toMap();
 
-        if (result.size() > 0) {
-          lru_cache.forceInsert(token, result);
-          return result;
-        } else {
-          return null;
+        if (!(Boolean) result.get("ok")) {
+            String code = (String) result.get("code");
+            String msg = (String) result.get("error_message");
+
+            throw Errors.createErrorByCode(code, msg);
         }
+
+        Object data = result.get("data");
+        if (data == null) {
+            return null;
+        }
+
+        Map<String, Object> dataObj = new JSONObject(data).toMap();
+        lru_cache.forceInsert(token, dataObj);
+
+        return dataObj;
     }
 
-    // e метод, який пакує HashMap і передає її в Rust
     public static boolean update(String token, Map<String, Object> hash, long ttl, long silence_read) throws IOException {
+      if (!Config.wasStarted()) {
+          throw new RuntimeException(
+              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+          );
+        }
+
         byte[] packedData = pack(hash);
+        Validation.validateHashBytesize(packedData.length);
         boolean result = lib.__update(token, packedData, packedData.length, ttl, silence_read);
 
         if (result) {
@@ -173,37 +203,67 @@ public class CRUD_JT {
 
     // r метод
     public static boolean delete(String token) {
+      if (!Config.wasStarted()) {
+          throw new RuntimeException(
+              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+          );
+        }
+
         lru_cache.delete(token);
+
         return lib.__delete(token);
     }
 
     public static class Config {
-        private static String encrypted_key;
-        private static String store_jt_path;
+      private static final Map<String, Object> settings = new HashMap<>();
+      private static boolean wasStarted = false;
 
-        public static Config encrypted_key(String value) {
-            encrypted_key = value;
-            return ConfigHolder.INSTANCE;
-        }
+      public static Config encrypted_key(String value) {
+          Validation.validateEncrypted_key(value);
+          settings.put("encrypted_key", value);
+          return ConfigHolder.INSTANCE;
+      }
 
-        public static Config store_jt_path(String value) {
-            store_jt_path = value;
-            return ConfigHolder.INSTANCE;
-        }
+      public static Config store_jtPath(String value) {
+          settings.put("store_jt_path", value);
+          return ConfigHolder.INSTANCE;
+      }
 
-        public static void start() {
-            if (store_jt_path != null) lib.__store_jt_path(store_jt_path);
-            if (encrypted_key != null) lib.__encrypted_key(encrypted_key);
-        }
+      public static boolean wasStarted() {
+          return wasStarted;
+      }
 
-        // Трюк для повернення "self" у стилі builder
-        private static class ConfigHolder {
-            private static final Config INSTANCE = new Config();
-        }
-    }
+      public static void start() {
+          if (!settings.containsKey("encrypted_key")) {
+              throw new IllegalStateException(
+                  Validation.errorMessage(Validation.ERROR_ENCRYPTED_KEY_NOT_SET)
+              );
+          }
+          if (wasStarted) {
+              throw new IllegalStateException(
+                  Validation.errorMessage(Validation.ERROR_ALREADY_STARTED)
+              );
+          }
 
+          String encrypted_key = (String) settings.get("encrypted_key");
+          String store_jtPath = (String) settings.get("store_jt_path");
 
-    // Допоміжний метод для пакування HashMap у байти
+          String response = (String) lib.start_store_jt(encrypted_key, store_jtPath);
+          Map<String, Object> result = new JSONObject(response).toMap();
+          if (!(Boolean) result.get("ok")) {
+              String code = (String) result.get("code");
+              String msg = (String) result.get("error_message");
+
+              throw Errors.createErrorByCode(code, msg);
+          }
+
+          wasStarted = true;
+      }
+
+      private static class ConfigHolder {
+          private static final Config INSTANCE = new Config();
+      }
+}
     private static byte[] pack(Map<String, Object> map) throws IOException {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         packer.packMapHeader(map.size());
@@ -212,11 +272,7 @@ public class CRUD_JT {
             packer.packString(entry.getValue().toString());
         }
         packer.close();
+
         return packer.toByteArray();
     }
-
-    // // // Приклад основного методу для тестування
-    // public static void main(String[] args) throws IOException {
-    //     lib.encrypted_key("Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg==");
-    // }
 }
