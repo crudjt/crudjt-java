@@ -1,11 +1,16 @@
 import errors.InternalError;
+import errors.DonateException;
+import java.util.HashMap;
 import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 
 public class Errors {
-    public static final Map<String, Class<? extends RuntimeException>> ERRORS = Map.of(
-        "XX000", InternalError.class
-    );
+    public static final Map<String, Class<? extends RuntimeException>> ERRORS = new HashMap<>();
+
+    static {
+        ERRORS.put("XX000", InternalError.class);
+        ERRORS.put("DE000", DonateException.class);
+    }
 
     public static RuntimeException createErrorByCode(String code, String message) {
         Class<? extends RuntimeException> cls = ERRORS.get(code);
