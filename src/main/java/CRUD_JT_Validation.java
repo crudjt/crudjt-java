@@ -1,7 +1,7 @@
 import java.util.Base64;
 import java.util.Map;
 
-public class Validation {
+public class CRUD_JT_Validation {
     private static final long U64_MAX = (long) Math.pow(2, 64) - 1;
 
     public static final int MAX_HASH_SIZE = 256;

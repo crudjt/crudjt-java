@@ -21,9 +21,7 @@ import java.util.regex.Matcher;
 import org.json.JSONException;
 
 public class CRUD_JT {
-    // Інтерфейс до нативної Rust бібліотеки
     public interface MyRustLib {
-        // void encrypted_key(String token);
         String __create(byte[] buffer, long size, long ttl, long silence_read);
         String __read(String token);
         boolean __update(String token, byte[] buffer, long size, long ttl, long silence_read);
@@ -38,8 +36,8 @@ public class CRUD_JT {
 
     static {
         try {
-            File tempFile = loadNativeLibrary();  // Завантажуємо бібліотеку у тимчасовий файл
-            lib = LibraryLoader.create(MyRustLib.class).load(tempFile.getAbsolutePath());  // Завантажуємо з правильним шляхом
+            File tempFile = loadNativeLibrary();
+            lib = LibraryLoader.create(MyRustLib.class).load(tempFile.getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException("Failed to load native library", e);
         }
@@ -53,9 +51,8 @@ public class CRUD_JT {
             throw new IOException("Cannot find the library file in resources: " + libPath);
         }
 
-        // Створюємо тимчасовий файл для бібліотеки
         File tempFile = File.createTempFile("store_jt", getLibraryExtension());
-        tempFile.deleteOnExit(); // Видалення файлу при завершенні програми
+        tempFile.deleteOnExit();
 
         try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
             byte[] buffer = new byte[1024];
@@ -65,7 +62,6 @@ public class CRUD_JT {
             }
         }
 
-        // Повертаємо шлях до тимчасового файлу
         return tempFile;
     }
 
@@ -73,7 +69,6 @@ public class CRUD_JT {
         String osFolder;
         String archFolder;
 
-        // Визначаємо папку для ОС
         if (osName.contains("win")) {
             osFolder = "windows";
         } else if (osName.contains("mac")) {
@@ -84,7 +79,6 @@ public class CRUD_JT {
             throw new UnsupportedOperationException("Unsupported operating system: " + osName);
         }
 
-        // Визначаємо папку для архітектури
         if (Pattern.compile("arm64|aarch").matcher(osArch).find()) {
             archFolder = "arm64";
         } else if (Pattern.compile("x86_64|x64|amd64").matcher(osArch).find()) {
@@ -93,13 +87,11 @@ public class CRUD_JT {
             throw new UnsupportedOperationException("Unsupported architecture: " + osArch);
         }
 
-        // Повертаємо шлях до бібліотеки
         return "/native/" + osFolder + "/store_jt_" + archFolder + getLibraryExtension();
     }
 
     private static String getLibraryExtension() {
         if (osName.contains("win")) {
-            // return ".dll";
             throw new UnsupportedOperationException("Unsupported operating system: " + osName);
         } else if (osName.contains("mac")) {
             return ".dylib";
@@ -110,33 +102,28 @@ public class CRUD_JT {
         }
     }
 
-    // Метод для використання бібліотеки
     public static MyRustLib getLib() {
         return lib;
     }
 
-    private static final LRUCache lru_cache;
+    private static final CRUD_JT_LRUCache lru_cache;
 
-    static { lru_cache = new LRUCache(value -> {
-      // System.out.println(value);
+    static { lru_cache = new CRUD_JT_LRUCache(value -> {
       return lib.__read(value);
     }); }
 
-    // q метод, який пакує HashMap у байти та викликає __create
     public static String create(Map<String, Object> hash, long ttl, long silence_read) throws IOException {
       if (!Config.wasStarted()) {
           throw new RuntimeException(
-              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+              CRUD_JT_Validation.errorMessage(CRUD_JT_Validation.ERROR_NOT_STARTED)
           );
         }
 
-        Validation.validateInsertion(hash, ttl, silence_read);
+        CRUD_JT_Validation.validateInsertion(hash, ttl, silence_read);
 
-        // Пакуємо дані через MessagePack
         byte[] packedData = pack(hash);
-        Validation.validateHashBytesize(packedData.length);
+        CRUD_JT_Validation.validateHashBytesize(packedData.length);
 
-        // Викликаємо нативний метод Rust через JNR-FFI
         String token = lib.__create(packedData, packedData.length, ttl, silence_read);
         if (token == null) {
             throw new InternalError("Something went wrong. Ups");
@@ -150,7 +137,7 @@ public class CRUD_JT {
     public static Map<String, Object> read(String token) {
       if (!Config.wasStarted()) {
           throw new RuntimeException(
-              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+              CRUD_JT_Validation.errorMessage(CRUD_JT_Validation.ERROR_NOT_STARTED)
           );
         }
 
@@ -170,7 +157,7 @@ public class CRUD_JT {
             String code = (String) result.get("code");
             String msg = (String) result.get("error_message");
 
-            throw Errors.createErrorByCode(code, msg);
+            throw CRUD_JT_Errors.createErrorByCode(code, msg);
         }
 
         Object data = result.get("data");
@@ -187,12 +174,12 @@ public class CRUD_JT {
     public static boolean update(String token, Map<String, Object> hash, long ttl, long silence_read) throws IOException {
       if (!Config.wasStarted()) {
           throw new RuntimeException(
-              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+              CRUD_JT_Validation.errorMessage(CRUD_JT_Validation.ERROR_NOT_STARTED)
           );
         }
 
         byte[] packedData = pack(hash);
-        Validation.validateHashBytesize(packedData.length);
+        CRUD_JT_Validation.validateHashBytesize(packedData.length);
         boolean result = lib.__update(token, packedData, packedData.length, ttl, silence_read);
 
         if (result) {
@@ -201,11 +188,10 @@ public class CRUD_JT {
         return result;
     }
 
-    // r метод
     public static boolean delete(String token) {
       if (!Config.wasStarted()) {
           throw new RuntimeException(
-              Validation.errorMessage(Validation.ERROR_NOT_STARTED)
+              CRUD_JT_Validation.errorMessage(CRUD_JT_Validation.ERROR_NOT_STARTED)
           );
         }
 
@@ -219,7 +205,7 @@ public class CRUD_JT {
       private static boolean wasStarted = false;
 
       public static Config encrypted_key(String value) {
-          Validation.validateEncrypted_key(value);
+          CRUD_JT_Validation.validateEncrypted_key(value);
           settings.put("encrypted_key", value);
           return ConfigHolder.INSTANCE;
       }
@@ -236,12 +222,12 @@ public class CRUD_JT {
       public static void start() {
           if (!settings.containsKey("encrypted_key")) {
               throw new IllegalStateException(
-                  Validation.errorMessage(Validation.ERROR_ENCRYPTED_KEY_NOT_SET)
+                  CRUD_JT_Validation.errorMessage(CRUD_JT_Validation.ERROR_ENCRYPTED_KEY_NOT_SET)
               );
           }
           if (wasStarted) {
               throw new IllegalStateException(
-                  Validation.errorMessage(Validation.ERROR_ALREADY_STARTED)
+                  CRUD_JT_Validation.errorMessage(CRUD_JT_Validation.ERROR_ALREADY_STARTED)
               );
           }
 
@@ -254,7 +240,7 @@ public class CRUD_JT {
               String code = (String) result.get("code");
               String msg = (String) result.get("error_message");
 
-              throw Errors.createErrorByCode(code, msg);
+              throw CRUD_JT_Errors.createErrorByCode(code, msg);
           }
 
           wasStarted = true;

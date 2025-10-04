@@ -132,8 +132,7 @@ public class TestCRUD_JT {
             "devices", Map.of(
                 "ios_expired_at", Instant.now().toString(),
                 "android_expired_at", Instant.now().toString(),
-                "mobile_app_expired_at", Instant.now().toString(),
-                "external_api_integration_expired_at", Instant.now().toString()
+                "mobile_app_expired_at", Instant.now().toString()
             ),
             "a", 42
         );

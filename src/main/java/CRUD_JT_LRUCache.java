@@ -3,12 +3,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class LRUCache {
+public class CRUD_JT_LRUCache {
     private static final int CACHE_CAPACITY = 40_000;
     private final Map<String, Map<String, Object>> cache;
     private final Function<String, String> readFunc;
 
-    public LRUCache(Function<String, String> readFunc) {
+    public CRUD_JT_LRUCache(Function<String, String> readFunc) {
         this.cache = new LinkedHashMap<String, Map<String, Object>>(CACHE_CAPACITY, 0.75f, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, Map<String, Object>> eldest) {
@@ -20,7 +20,6 @@ public class LRUCache {
 
     public Map<String, Object> get(String token) {
         Map<String, Object> cachedtoken = cache.get(token);
-        // System.out.println(cachedtoken);
 
         if (cachedtoken != null) {
             if (cachedtoken.containsKey("data")) {
@@ -31,9 +30,6 @@ public class LRUCache {
             Map<String, Object> output = new LinkedHashMap<>();
 
             Map<String, Object> metadata = (Map<String, Object>) cachedtoken.get("metadata");
-            // if (metadata != null) {
-            //     System.out.println(metadata.containsKey("silence_read"));
-            // }
 
             if (metadata != null && metadata.containsKey("ttl")) {
                 long ttl = ((Instant) metadata.get("ttl")).getEpochSecond() - Instant.now().getEpochSecond();
@@ -51,23 +47,17 @@ public class LRUCache {
                 output.putIfAbsent("metadata", new LinkedHashMap<>());
                 ((Map<String, Object>) output.get("metadata")).put("silence_read", silence_read);
 
-                // System.out.println("silence_read: " + silence_read);
-                // System.out.println(output);
-
                 if (silence_read <= 0) {
                     cache.remove(token);
                 } else {
                   ((Map<String, Object>) cachedtoken.get("metadata")).put("silence_read", silence_read);
                 }
-                // System.out.println(readFunc.apply(token));
-                // System.out.println(token);
-                // String result = this.readFunc.apply(token);
-                // System.out.println(result);
+
                 readFunc.apply(token);
             }
 
             output.put("data", cachedtoken.get("data"));
-            // System.out.println(output);
+
             return output;
         }
         return null;

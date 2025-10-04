@@ -1,10 +1,10 @@
-import errors.InternalError;
-import errors.DonateException;
+import crud_jt_errors.InternalError;
+import crud_jt_errors.DonateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 
-public class Errors {
+public class CRUD_JT_Errors {
     public static final Map<String, Class<? extends RuntimeException>> ERRORS = new HashMap<>();
 
     static {
