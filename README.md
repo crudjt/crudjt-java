@@ -191,7 +191,6 @@ Stored tokens are placed in the **file system** according to the following order
 2. Default system location
    - **Linux**: `/var/lib/store_jt`
    - **macOS**: `/usr/local/var/store_jt`
-   - **Windows**: `C:\Program Files\store_jt`
 3. Project root directory (fallback)
 
 ## Storage Characteristics
