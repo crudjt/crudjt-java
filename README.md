@@ -19,13 +19,13 @@ The compiled library is available in two ways:
 
 ## Maven
 
-The crud_jt-java is available in Maven Central
+The crudjt-java is available in Maven Central
 
 ```xml
 <dependencies>
     <dependency>
       <groupId>com.github</groupId>
-      <artifactId>crud_jt-java</artifactId>
+      <artifactId>crudjt-java</artifactId>
       <version>1.0.0</version>
     </dependency>
 </dependencies>
@@ -35,7 +35,7 @@ The crud_jt-java is available in Maven Central
 
 ```txt
 dependencies {
-  implementation 'com.github:crud_jt-java:1.0.0'
+  implementation 'com.github:crudjt-java:1.0.0'
 }
 ```
 
@@ -240,7 +240,7 @@ The library has the following limits and requirements
 </p>
 
 - **Custom integrations / new features / collaboration**: support@crudjt.com  
-- **Library support & bug reports:** [open an issue](https://github.com/crud_jt/crud_jt-ruby/issues)
+- **Library support & bug reports:** [open an issue](https://github.com/crudjt/crudjt-java/issues)
 
 
 # Lincense

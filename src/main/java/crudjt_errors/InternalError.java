@@ -1,4 +1,4 @@
-package crud_jt_errors;
+package crudjt_errors;
 
 public class InternalError extends RuntimeException {
     public InternalError(String message) {

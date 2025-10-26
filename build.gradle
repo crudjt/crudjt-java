@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.github'
-version = '1.0.0'
+version = '1.0.0.beta.0'
 
 repositories {
     mavenCentral()
@@ -27,7 +27,7 @@ tasks.withType(Jar).configureEach {
 jar {
     manifest {
         attributes(
-            'Implementation-Title': 'CRUD_JT Library',
+            'Implementation-Title': 'CRUD JT Library',
             'Implementation-Version': version,
             'Main-Class': 'CRUD_JT'
         )
@@ -42,7 +42,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifactId = 'crud_jt-java'
+            artifactId = 'crudjt-java'
         }
     }
 }

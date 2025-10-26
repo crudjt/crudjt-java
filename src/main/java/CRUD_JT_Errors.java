@@ -1,5 +1,5 @@
-import crud_jt_errors.InternalError;
-import crud_jt_errors.DonateException;
+import crudjt_errors.InternalError;
+import crudjt_errors.DonateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
