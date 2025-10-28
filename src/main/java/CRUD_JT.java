@@ -119,6 +119,10 @@ public class CRUD_JT {
           );
         }
 
+        if (Config.hint_cheatcode() != Config.CHEATCODE ) {
+            silence_read = -1;
+        }
+
         CRUD_JT_Validation.validateInsertion(hash, ttl, silence_read);
 
         byte[] packedData = pack(hash);
@@ -178,6 +182,10 @@ public class CRUD_JT {
           );
         }
 
+        if (Config.hint_cheatcode() != Config.CHEATCODE ) {
+            silence_read = -1;
+        }
+
         byte[] packedData = pack(hash);
         CRUD_JT_Validation.validateHashBytesize(packedData.length);
         boolean result = lib.__update(token, packedData, packedData.length, ttl, silence_read);
@@ -203,6 +211,7 @@ public class CRUD_JT {
     public static class Config {
       private static final Map<String, Object> settings = new HashMap<>();
       private static boolean wasStarted = false;
+      public static final String CHEATCODE = "BAGUVIX";
 
       public static Config encrypted_key(String value) {
           CRUD_JT_Validation.validateEncrypted_key(value);
@@ -213,6 +222,15 @@ public class CRUD_JT {
       public static Config store_jtPath(String value) {
           settings.put("store_jt_path", value);
           return ConfigHolder.INSTANCE;
+      }
+
+      public static Config cheatcode(String code) {
+          settings.put("cheatcode", code);
+          return ConfigHolder.INSTANCE;
+      }
+
+      public static String hint_cheatcode() {
+          return (String) settings.get("cheatcode");
       }
 
       public static boolean wasStarted() {
@@ -241,6 +259,14 @@ public class CRUD_JT {
               String msg = (String) result.get("error_message");
 
               throw CRUD_JT_Errors.createErrorByCode(code, msg);
+          }
+
+          if (Config.hint_cheatcode() == Config.CHEATCODE ) {
+            System.out.println(
+                "🐰🥚 You have activated optional param silence_read for CRUD_JT on method create\n" +
+                "Ideal for one-time reads, email confirmation links, or limits on the number of operations\n" +
+                "Each read decrements silence_read by 1, when the counter reaches zero — the token is deleted permanently"
+              );
           }
 
           wasStarted = true;
