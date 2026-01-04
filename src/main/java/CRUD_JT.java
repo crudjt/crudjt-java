@@ -241,10 +241,6 @@ public class CRUD_JT {
           );
         }
 
-        if (Config.hint_cheatcode() != Config.CHEATCODE ) {
-            silence_read = -1;
-        }
-
         byte[] packedData = MsgPackUtils.pack(hash);
         CRUD_JT_Validation.validateHashBytesize(packedData.length);
         boolean result = lib.__update(token, packedData, packedData.length, ttl, silence_read);
@@ -308,7 +304,6 @@ public class CRUD_JT {
     public static class Config {
       private static final Map<String, Object> settings = new HashMap<>();
       private static boolean wasStarted = false;
-      public static final String CHEATCODE = "BAGUVIX";
 
       private static final String GRPC_HOST = "127.0.0.1";
       private static final int GRPC_PORT = 50051;
@@ -316,26 +311,6 @@ public class CRUD_JT {
 
       private static ManagedChannel channel;
       private static TokenServiceGrpc.TokenServiceBlockingStub tokenStub;
-
-      public static Config encrypted_key(String value) {
-          CRUD_JT_Validation.validateEncrypted_key(value);
-          settings.put("encrypted_key", value);
-          return ConfigHolder.INSTANCE;
-      }
-
-      public static Config store_jtPath(String value) {
-          settings.put("store_jt_path", value);
-          return ConfigHolder.INSTANCE;
-      }
-
-      public static Config cheatcode(String code) {
-          settings.put("cheatcode", code);
-          return ConfigHolder.INSTANCE;
-      }
-
-      public static String hint_cheatcode() {
-          return (String) settings.get("cheatcode");
-      }
 
       public static boolean wasStarted() {
           return wasStarted;
