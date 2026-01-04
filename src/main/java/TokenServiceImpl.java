@@ -48,7 +48,7 @@ public class TokenServiceImpl
             Long ttl = request.getTtl();
             Long silence_read = request.getSilenceRead();
 
-            String value = CRUD_JT.original_create(data, ttl, silence_read);
+            String value = CRUDJT.original_create(data, ttl, silence_read);
 
             CreateTokenResponse response = CreateTokenResponse
                     .newBuilder()
@@ -68,7 +68,7 @@ public class TokenServiceImpl
         try {
             String rawToken = request.getToken();
 
-            Map<String, Object> resultHash = CRUD_JT.original_read(rawToken);
+            Map<String, Object> resultHash = CRUDJT.original_read(rawToken);
 
             Map<String, Object> safeMap =
                     (resultHash == null) ? Collections.emptyMap() : resultHash;
@@ -98,7 +98,7 @@ public class TokenServiceImpl
             Long ttl = request.getTtl();
             Long silence_read = request.getSilenceRead();
 
-            boolean result = CRUD_JT.original_update(rawToken, unpackedData, ttl, silence_read);
+            boolean result = CRUDJT.original_update(rawToken, unpackedData, ttl, silence_read);
 
             UpdateTokenResponse response = UpdateTokenResponse.newBuilder()
                     .setResult(result)
@@ -116,7 +116,7 @@ public class TokenServiceImpl
         try {
           String rawToken = request.getToken();
 
-          boolean result = CRUD_JT.original_delete(rawToken);
+          boolean result = CRUDJT.original_delete(rawToken);
 
           DeleteTokenResponse response = DeleteTokenResponse.newBuilder()
                   .setResult(result)
