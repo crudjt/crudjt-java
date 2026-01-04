@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  Simplifies user session. Login/Logout/Authorization
+  Fast, file-backed JSON token for REST APIs with multi-process support
 </p>
 
 <p align="center">
@@ -12,6 +12,9 @@
     <img src="logos/buy_me_a_coffee_orange.svg" alt="Buy Me a Coffee"/>
   </a>
 </p>
+
+## Why?  
+[Escape the JWT trap: predictable login, safe logout](https://medium.com/@CoffeeMainer/jwt-trap-login-logout-under-control-7f4495d6024d)
 
 # Installation
 
@@ -39,101 +42,81 @@ dependencies {
 }
 ```
 
-Configure CRUD JT in your project
+Start CRUDJT master in your project  
 
 ```java
-// openssl rand -base64 48 # In your terminal
+// openssl rand -base64 48 // In your terminal
 // => your_encrypted_base64/48
-CRUD_JT.Config
-    .encrypted_key("your_encrypted_base64/32/48/64")
-    .store_jt_path("your_path_to_file_storage") // optional
-    .start();
+CRUDJT.Config.startMaster(
+    Map.of(
+        "encrypted_key", "your_encrypted_base64/32/48/64",
+        "store_jt_path", "your_path_to_file_storage", // optional
+        "grpc_host", "127.0.0.1", // default
+        "grpc_port", 50051 // default
+    )
+);
+```
+
+Or connect to master  
+
+```java
+CRUDJT.Config.connectToMaster(
+    Map.of(
+        "grpc_host", "127.0.0.1", // default
+        "grpc_port", 50051 // default
+    )
+);
 ```
 
 # C
 
 ```java
-CRUD_JT.create(Map.of("user_id", 42, "role", 11))
+Map<String, Object> data = Map.of("user_id", 42, "role", 11); // required
+long ttl = 3600 * 24 * 30 // optional // Dynamic time to live token in seconds
+
+// Optional // Each read decrements silence_read by 1, when the counter reaches
+// zero — the token is deleted permanently
+long silence_read = 10;
+
+CRUDJT.create(data, ttl, silence_read);
 => "HBmKFXoXgJ46mCqer1WXyQ"
-```
-
-```java
-// with ttl — token time-to-live in seconds
-ttl = 3600 * 24 * 30
-
-CRUD_JT.create(Map.of("user_id", 42, "role", 11), ttl)
-=> "HBmKFXoXgJ46mCqer1WXyQ"
-```
-
-```java
-☕ = 🐰🥚
 ```
 
 # R
 
 ```java
-// ...
-CRUD_JT.read("HBmKFXoXgJ46mCqer1WXyQ")
-=> {data={user_id=42, role=11}}
+CRUDJT.read("HBmKFXoXgJ46mCqer1WXyQ");
+=> {metadata={ttl=101001, silence_read=9}, data={user_id=42, role=11}}
 ```
 
 ```java
-// with ttl
-CRUD_JT.read("HBmKFXoXgJ46mCqer1WXyQ")
-=> {metadata={ttl=3}, data={user_id=42, role=11}}
-
-// after 1 second
-CRUD_JT.read("HBmKFXoXgJ46mCqer1WXyQ")
-=> {metadata={ttl=2}, data={user_id=42, role=11}}
-
-// still second
-CRUD_JT.read("HBmKFXoXgJ46mCqer1WXyQ")
-=> {metadata={ttl=1}, data={user_id=42, role=11}}
-
-// ups
-CRUD_JT.read("HBmKFXoXgJ46mCqer1WXyQ")
+// when expired/not found token
+CRUDJT.read("HBmKFXoXgJ46mCqer1WXyQ");
 => null
-```
-
-```java
-// with 🐰🥚
 ```
 
 # U
 
 ```java
-CRUD_JT.update("HBmKFXoXgJ46mCqer1WXyQ", Map.of("user_id", 42, "role", 8))
-=> true // {data={user_id=42, role=8}}
-```
-
-```java
-// supported for ttl
-ttl = 41
-
-CRUD_JT.update("HBmKFXoXgJ46mCqer1WXyQ", Map.of("user_id", 42, "role", 8), ttl)
-=> true // {metadata={ttl=41}, data={user_id=42, role=8}}
-```
-
-```java
-// supported for 🐰🥚
+CRUDJT.update("HBmKFXoXgJ46mCqer1WXyQ", Map.of("user_id", 42, "role", 8), 600, 100);
+=> true // {metadata={ttl=600, silence_read=100}, data={user_id=42, role=8}}
 ```
 
 ```java
 // when expired/not found token
-CRUD_JT.update("HBmKFXoXgJ46mCqer1WXyQ", Map.of("user_id", 42, "role", 8))
+CRUDJT.update("HBmKFXoXgJ46mCqer1WXyQ", Map.of("user_id", 42, "role", 8));
 => false
 ```
 
 # D
 ```java
-// when token exist
-CRUD_JT.delete("HBmKFXoXgJ46mCqer1WXyQ")
+CRUDJT.delete("HBmKFXoXgJ46mCqer1WXyQ");
 => true
 ```
 
 ```java
 // when expired/not found token
-CRUD_JT.delete("HBmKFXoXgJ46mCqer1WXyQ")
+CRUDJT.delete("HBmKFXoXgJ46mCqer1WXyQ");
 => false
 ```
 
@@ -142,60 +125,45 @@ CRUD_JT.delete("HBmKFXoXgJ46mCqer1WXyQ")
 ARM64 (Apple M1+), macOS 15.6/15.6.1  
 Java 17.0.16/21.0.8
 
-| Function | CRUD JT (Java) | JWT (Java) | redis-session-store (Ruby, Rails 8.0.4) |
+| Function | CRUDJT (Java) | JWT (Java) | redis-session-store (Ruby, Rails 8.0.4) |
 |----------|-------|------|------|
 | C        | 0.423 second | 0.207 second ⭐ | 4.057 seconds |
 | R        | `0.023 second` ![Logo Favicon Light](logos/crud_jt_logo_favicon_white.png#gh-light-mode-only) ![Logo Favicon Dark](logos/crud_jt_logo_favicon_black.png#gh-dark-mode-only) | 0.297 second | 7.011 seconds |
 | U        | `0.535 second` ![Logo Favicon Light](logos/crud_jt_logo_favicon_white.png#gh-light-mode-only) ![Logo Favicon Dark](logos/crud_jt_logo_favicon_black.png#gh-dark-mode-only) | X | 3.49 seconds |
 | D        | `0.277 second` ![Logo Favicon Light](logos/crud_jt_logo_favicon_white.png#gh-light-mode-only) ![Logo Favicon Dark](logos/crud_jt_logo_favicon_black.png#gh-dark-mode-only) | X | 6.589 seconds |
 
-[Full results](https://github.com/exwarvlad/benchmarks)
+[Full benchmark results](https://github.com/exwarvlad/benchmarks)
 
-# Storage (Store JT)
+# Storage (File-backed)  
+
+## Disk footprint  
+**40k** tokens of **256 bytes** each — median over 10 creates  
+darwin23, APFS  
+
+`48 MB`  
+
+[Full disk footprint results](https://github.com/Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1y/disk_footprint)
 
 ## Path Lookup Order
 Stored tokens are placed in the **file system** according to the following order
 
-1. Explicitly set via `CRUD_JT.Config.store_jt_path('custom/path/to/file_system_db');`
+1. Explicitly set via `CRUDJT.Config.startMaster(Map.of("store_jt_path", "custom/path/to/file_system_db"));`
 2. Default system location
    - **Linux**: `/var/lib/store_jt`
    - **macOS**: `/usr/local/var/store_jt`
 3. Project root directory (fallback)
 
 ## Storage Characteristics
-* Store JT **automatically removing expired tokens** every 24 hours without blocking the main thread   
-* **Store JT automatically fsyncs every 500ms**, meanwhile tokens ​​are available from cache
-* Store JT is available for one process to open per instance for the time being
+* CRUDJT **automatically removing expired tokens** after start and every 24 hours without blocking the main thread   
+* **Storage automatically fsyncs every 500ms**, meanwhile tokens ​​are available from cache
 
-## Configuration
-
-You can configure the library before starting it
-
-```java
-// Required configuration
-CRUD_JT.Config.encrypted_key("some_base64_key");
-
-// Optional configuration
-CRUD_JT.Config.store_jt_path("/custom/path/to/store_jt");
-
-// Start the CRUD JT and Store JT
-CRUD_JT.Config.start();
-```
-
-
-#### `encrypted_key(base64_key)`
-Sets the encrypted key (**required**)
-
-#### `store_jt_path(path_to_db)`
-Overrides the default Store JT path (**optional**)
-
-#### `start!`
-Initializes the CRUD JT and opens the Store JT (**must be called last**)
+# Multi-process Coordination
+For multi-process scenarios, CRUDJT uses gRPC over an insecure local port for same-host communication only. It is not intended for inter-machine or internet-facing usage
 
 # Limits
 The library has the following limits and requirements
 
-- **Python version:** tested with 3.12.5
+- **Java version:** tested with 17.0.16
 - **Supported platforms:** Linux, macOS (x86_64 / arm64)
 - **Maximum json size per token:** 256 bytes
 - **`encrypted_key` format:** must be Base64
@@ -212,8 +180,8 @@ The library has the following limits and requirements
 
 
 # Lincense
-CRUD JT is released under the [MIT License](LICENSE.txt)
+CRUDJT is released under the [MIT License](LICENSE.txt)
 
 <p align="center">
-  💘 Shoot your g . ? Love me out via <a href="https://www.patreon.com/crudjt">Github Sponsors</a>!
+  💘 Shoot your g . ? Love me out via <a href="https://www.patreon.com/crudjt">Patreon Sponsors</a>!
 </p>
