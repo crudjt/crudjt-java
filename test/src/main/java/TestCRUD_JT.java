@@ -37,10 +37,11 @@ public class TestCRUD_JT {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        CRUD_JT.Config
-            .encrypted_key("Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg==")
-            .cheatcode(CRUD_JT.Config.CHEATCODE)
-            .start();
+        CRUD_JT.Config.startMaster(
+            Map.of(
+                "encrypted_key", "Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg=="
+            )
+        );
 
         System.out.println("OS: " + System.getProperty("os.name"));
         System.out.println("CPU: " + System.getProperty("os.arch"));
@@ -117,9 +118,9 @@ public class TestCRUD_JT {
         for (int i = 0; i < silence_read; i++) {
             Map<String,Object> originalMap = CRUD_JT.read(tokenWithttlAndsilence_read);
             Map<String, Object> sortedMap = sortMapRecursively(originalMap);
-            Map<String, Object> expectedMap = new TreeMap<>(Map.of("metadata", new TreeMap<>(Map.of("ttl", expectedttl, "silence_read", expectedsilence_read)), "data", data));
+            Map<String, Object> expectedMap = new HashMap<>(Map.of("metadata", new HashMap<>(Map.of("ttl", expectedttl, "silence_read", expectedsilence_read)), "data", data));
 
-            System.out.println(sortedMap.toString().equals(expectedMap.toString()));
+            System.out.println(sortedMap.equals(expectedMap));
             expectedttl--;
             expectedsilence_read--;
             TimeUnit.SECONDS.sleep(1);

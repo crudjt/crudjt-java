@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id "com.google.protobuf" version "0.9.4"
 }
 
 group = 'com.github'
@@ -14,6 +15,14 @@ dependencies {
     implementation 'com.github.jnr:jnr-ffi:2.2.16'
     implementation 'org.msgpack:msgpack-core:0.9.0'
     implementation 'org.json:json:20210307'
+
+    implementation "io.grpc:grpc-netty-shaded:1.63.0"
+    implementation "io.grpc:grpc-protobuf:1.63.0"
+    implementation "io.grpc:grpc-stub:1.63.0"
+
+    implementation "com.google.protobuf:protobuf-java:3.25.3"
+
+    compileOnly "org.apache.tomcat:annotations-api:6.0.53" // @Generated
 }
 
 tasks.withType(JavaCompile) {
@@ -43,6 +52,24 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifactId = 'crudjt-java'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.3"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.63.0"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                grpc {}
+            }
         }
     }
 }
