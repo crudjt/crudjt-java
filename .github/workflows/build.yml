@@ -29,5 +29,7 @@ jobs:
         run: ./gradlew publishToMavenLocal
 
       - name: Run tests in the test project
+        env:
+          CRUDJT_AUTOTEST_ALLOWED: true
         working-directory: ./test
         run: ./gradlew run
