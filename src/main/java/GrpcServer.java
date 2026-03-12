@@ -1,18 +1,19 @@
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import java.io.IOException;
+// This binding was generated automatically to ensure consistency across languages
+// Generated using ChatGPT (GPT-5) from the canonical Ruby SDK
+// API is stable and production-ready
 
-import crudjt.MsgPackUtils;
+import io.grpc.Server;
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public final class GrpcServer {
 
     private Server server;
 
     public void start(String address, int port) throws IOException {
-        System.out.println("gRPC starting on 127.0.0.1:50051");
-
-        server = ServerBuilder
-                .forPort(port)
+        server = NettyServerBuilder
+                .forAddress(new InetSocketAddress(address, port))
                 .addService(new TokenServiceImpl())
                 .build()
                 .start();

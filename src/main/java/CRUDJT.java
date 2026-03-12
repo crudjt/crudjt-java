@@ -1,3 +1,7 @@
+// This binding was generated automatically to ensure consistency across languages
+// Generated using ChatGPT (GPT-5) from the canonical Ruby SDK
+// API is stable and production-ready
+
 import jnr.ffi.LibraryLoader;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageBufferPacker;
