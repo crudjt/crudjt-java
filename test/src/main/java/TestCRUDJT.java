@@ -41,6 +41,11 @@ public class TestCRUDJT {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        if (!"true".equals(System.getenv("CRUDJT_AUTOTEST_ALLOWED"))) {
+          System.out.println("Denied run autotest for this environment. Set environment variable CRUDJT_AUTOTEST_ALLOWED = 'true'");
+          return;
+        }
+
         CRUDJT.Config.startMaster(
             Map.of(
                 "encrypted_key", System.getenv("CRUDJT_ENCRYPTED_KEY")
