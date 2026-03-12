@@ -43,7 +43,7 @@ public class TestCRUDJT {
     public static void main(String[] args) throws IOException, InterruptedException {
         CRUDJT.Config.startMaster(
             Map.of(
-                "encrypted_key", "Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg=="
+                "encrypted_key", System.getenv("CRUDJT_ENCRYPTED_KEY")
             )
         );
 
