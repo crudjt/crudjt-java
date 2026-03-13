@@ -8,8 +8,8 @@ plugins {
     id "com.google.protobuf" version "0.9.4"
 }
 
-group = 'com.github'
-version = '1.0.0.beta.0'
+group = 'com.github.crudjt'
+version = '1.0.0-beta.0'
 
 repositories {
     mavenCentral()
@@ -41,14 +41,13 @@ tasks.withType(Jar).configureEach {
 jar {
     manifest {
         attributes(
-            'Implementation-Title': 'CRUD JT Library',
-            'Implementation-Version': version,
-            'Main-Class': 'CRUDJT'
+            'Implementation-Title': 'CRUDJT Library',
+            'Implementation-Version': version
         )
     }
 
     from('src/main/resources') {
-        into('/')  // Копіюємо файли ресурсів у корінь jar
+        into('/')
     }
 }
 
@@ -77,4 +76,9 @@ protobuf {
             }
         }
     }
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
