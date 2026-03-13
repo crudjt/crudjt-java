@@ -48,10 +48,10 @@ public class TestCRUDJT {
 
         CRUDJT.Config.startMaster(
             Map.of(
-                "encrypted_key", "Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg=="
+                "secret_key", "Cm7B68NWsMNNYjzMDREacmpe5sI1o0g40ZC9w1yQW3WOes7Gm59UsittLOHR2dciYiwmaYq98l3tG8h9yXVCxg=="
             )
         );
-        
+
         System.out.println("OS: " + System.getProperty("os.name"));
         System.out.println("CPU: " + System.getProperty("os.arch"));
 

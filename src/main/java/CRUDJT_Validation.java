@@ -12,12 +12,12 @@ public class CRUDJT_Validation {
 
     public static final int ERROR_ALREADY_STARTED = 0;
     public static final int ERROR_NOT_STARTED = 1;
-    public static final int ERROR_ENCRYPTED_KEY_NOT_SET = 2;
+    public static final int ERROR_SECRET_KEY_NOT_SET = 2;
 
     public static final Map<Integer, String> ERROR_MESSAGES = Map.of(
         ERROR_ALREADY_STARTED, "CRUDJT already started",
         ERROR_NOT_STARTED, "CRUDJT has not started",
-        ERROR_ENCRYPTED_KEY_NOT_SET, "Encrypted key is blank"
+        ERROR_SECRET_KEY_NOT_SET, "Secret key is blank"
     );
 
     public static String errorMessage(int code) {
@@ -42,18 +42,18 @@ public class CRUDJT_Validation {
         }
     }
 
-    public static void validateEncrypted_key(String key) {
+    public static void validateSecret_key(String key) {
         byte[] decoded;
         try {
             decoded = Base64.getDecoder().decode(key);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("'encrypted_key' must be a valid Base64 string");
+            throw new IllegalArgumentException("'secret_key' must be a valid Base64 string");
         }
 
         int size = decoded.length;
         if (!(size == 32 || size == 48 || size == 64)) {
             throw new IllegalArgumentException(
-                "'encrypted_key' must be exactly 32, 48, or 64 bytes. Got " + size + " bytes"
+                "'secret_key' must be exactly 32, 48, or 64 bytes. Got " + size + " bytes"
             );
         }
     }

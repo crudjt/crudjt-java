@@ -57,7 +57,7 @@ public class CRUDJT {
         boolean __update(String token, byte[] buffer, long size, long ttl, long silence_read);
         boolean __delete(String token);
 
-        String start_store_jt(String encrypted_key, String store_jt_path);
+        String start_store_jt(String secret_key, String store_jt_path);
     }
 
     private static String osName = System.getProperty("os.name").toLowerCase();
@@ -348,20 +348,20 @@ public class CRUDJT {
       }
 
       public static void startMaster(Map<String, Object> options) {
-        if (options.get("encrypted_key") == null) {
+        if (options.get("secret_key") == null) {
             throw new IllegalStateException(
-                CRUDJT_Validation.errorMessage(CRUDJT_Validation.ERROR_ENCRYPTED_KEY_NOT_SET)
+                CRUDJT_Validation.errorMessage(CRUDJT_Validation.ERROR_SECRET_KEY_NOT_SET)
             );
         }
+
         if (wasStarted) {
             throw new IllegalStateException(
                 CRUDJT_Validation.errorMessage(CRUDJT_Validation.ERROR_ALREADY_STARTED)
             );
         }
 
-        CRUDJT_Validation.validateEncrypted_key((String) options.get("encrypted_key"));
+        CRUDJT_Validation.validateSecret_key((String) options.get("secret_key"));
 
-        settings.put("encrypted_key", options.get("encrypted_key"));
         settings.put("store_jt_path", options.get("store_jt_path"));
 
         settings.put(
@@ -374,7 +374,7 @@ public class CRUDJT {
                 options.getOrDefault("grpc_port", GRPC_PORT)
         );
 
-        String response = (String) lib.start_store_jt((String) settings.get("encrypted_key"), (String) settings.get("store_jt_path"));
+        String response = (String) lib.start_store_jt((String) options.get("secret_key"), (String) settings.get("store_jt_path"));
         Map<String, Object> result = new JSONObject(response).toMap();
         if (!(Boolean) result.get("ok")) {
             String code = (String) result.get("code");
