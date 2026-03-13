@@ -119,7 +119,7 @@ CRUDJT.create(Map.of("user_id", 42, "role", 11), null, null);
 # R
 
 ```java
-Map<String,Object> result = CRUDJT.read("HBmKFXoXgJ46mCqer1WXyQ");
+Map<String, Object> result = CRUDJT.read("HBmKFXoXgJ46mCqer1WXyQ");
 // result == {metadata={ttl=101001, silence_read=9}, data={user_id=42, role=11}}
 ```
 
