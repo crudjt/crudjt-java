@@ -153,7 +153,7 @@ public class TestCRUDJT {
             long start, end;
 
             // when creates
-            System.out.println("when creates 40k tokens with Turbo Queue");
+            System.out.println("when creates 40k tokens");
             start = System.nanoTime();
             String[] tokens = new String[REQUESTS];
             for (int j = 0; j < REQUESTS; j++) {

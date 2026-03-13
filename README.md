@@ -53,8 +53,6 @@ export CRUDJT_SECRET_KEY=$(openssl rand -base64 48)
 
 ### Start master (java)
 
-Start CRUDJT master in your project  
-
 ```java
 CRUDJT.Config.startMaster(
     Map.of(
