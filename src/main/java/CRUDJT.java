@@ -45,6 +45,10 @@ import com.google.protobuf.ByteString;
 
 import crudjt.MsgPackUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.msgpack.jackson.dataformat.MessagePackFactory;
+
 public class CRUDJT {
     public interface MyRustLib {
         String __create(byte[] buffer, long size, long ttl, long silence_read);
@@ -228,7 +232,13 @@ public class CRUDJT {
                     CRUDJT.Config.tokenStub.readToken(request);
 
             byte[] packedData = response.getPackedData().toByteArray();
-            Map<String, Object> result = MsgPackUtils.unpack(packedData);
+            if (packedData.length == 1 && packedData[0] == (byte) 0xC0) {
+                return null;
+            }
+
+            // Map<String, Object> result = MsgPackUtils.unpack(packedData);
+            ObjectMapper msgpackMapper = new ObjectMapper(new MessagePackFactory());
+            Map<String,Object> result = msgpackMapper.readValue(packedData, new TypeReference<>(){});
 
             if (result.isEmpty()) {
                 return null;

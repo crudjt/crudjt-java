@@ -127,9 +127,9 @@ public class TestCRUDJT {
         for (int i = 0; i < silence_read; i++) {
             Map<String,Object> originalMap = CRUDJT.read(tokenWithttlAndsilence_read);
             Map<String, Object> sortedMap = sortMapRecursively(originalMap);
-            Map<String, Object> expectedMap = new HashMap<>(Map.of("metadata", new HashMap<>(Map.of("ttl", expectedttl, "silence_read", expectedsilence_read)), "data", data));
+            Map<String, Object> expectedMap = sortMapRecursively(new HashMap<>(Map.of("metadata", new HashMap<>(Map.of("silence_read", expectedsilence_read, "ttl", expectedttl)), "data", data)));
 
-            System.out.println(sortedMap.equals(expectedMap));
+            System.out.println(sortedMap.toString().equals(expectedMap.toString()));
             expectedttl--;
             expectedsilence_read--;
             TimeUnit.SECONDS.sleep(1);
