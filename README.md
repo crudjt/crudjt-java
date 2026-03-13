@@ -112,8 +112,8 @@ String token = CRUDJT.create(data, ttl, silenceRead);
 ```
 
 ```java
-// To disable token expiration or read limits, pass `-1`
-CRUDJT.create(Map.of("user_id", 42, "role", 11), -1, -1);
+// To disable token expiration or read limits, pass `null`
+CRUDJT.create(Map.of("user_id", 42, "role", 11), null, null);
 ```
 
 # R
@@ -133,7 +133,7 @@ String token = CRUDJT.read("HBmKFXoXgJ46mCqer1WXyQ");
 
 ```java
 Map<String, Object> data = Map.of("user_id", 42, "role", 8);
-// `-1` disables limits
+// `null` disables limits
 long ttl = 600
 long silenceRead = 100;
 

@@ -48,6 +48,7 @@ import crudjt.MsgPackUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
+import java.util.Objects;
 
 public class CRUDJT {
     public interface MyRustLib {
@@ -163,16 +164,19 @@ public class CRUDJT {
         return token;
     }
 
-    public static String create(Map<String, Object> hash, long ttl, long silence_read) throws IOException {
+    public static String create(Map<String, Object> hash, Long ttl, Long silenceRead) throws IOException {
+        long safeTtl = Objects.requireNonNullElse(ttl, -1L);
+        long safeSilenceRead = Objects.requireNonNullElse(silenceRead, -1L);
+
         if (Config.isMaster()) {
-            return original_create(hash, ttl, silence_read);
+            return original_create(hash, safeTtl, safeSilenceRead);
         } else {
             byte[] packedData = MsgPackUtils.pack(hash);
 
             CreateTokenRequest request = CreateTokenRequest.newBuilder()
                     .setPackedData(ByteString.copyFrom(packedData))
-                    .setTtl(ttl)
-                    .setSilenceRead(silence_read)
+                    .setTtl(safeTtl)
+                    .setSilenceRead(safeSilenceRead)
                     .build();
 
             CreateTokenResponse response =
@@ -236,7 +240,6 @@ public class CRUDJT {
                 return null;
             }
 
-            // Map<String, Object> result = MsgPackUtils.unpack(packedData);
             ObjectMapper msgpackMapper = new ObjectMapper(new MessagePackFactory());
             Map<String,Object> result = msgpackMapper.readValue(packedData, new TypeReference<>(){});
 
@@ -265,17 +268,20 @@ public class CRUDJT {
         return result;
     }
 
-    public static boolean update(String token, Map<String, Object> hash, long ttl, long silence_read) throws IOException {
+    public static boolean update(String token, Map<String, Object> hash, Long ttl, Long silenceRead) throws IOException {
+        long safeTtl = Objects.requireNonNullElse(ttl, -1L);
+        long safeSilenceRead = Objects.requireNonNullElse(silenceRead, -1L);
+
         if (Config.isMaster()) {
-            return original_update(token, hash, ttl, silence_read);
+            return original_update(token, hash, safeTtl, safeSilenceRead);
         } else {
             byte[] packedData = MsgPackUtils.pack(hash);
 
             UpdateTokenRequest request = UpdateTokenRequest.newBuilder()
                     .setPackedData(ByteString.copyFrom(packedData))
                     .setToken(token)
-                    .setTtl(ttl)
-                    .setSilenceRead(silence_read)
+                    .setTtl(safeTtl)
+                    .setSilenceRead(safeSilenceRead)
                     .build();
 
             UpdateTokenResponse response =

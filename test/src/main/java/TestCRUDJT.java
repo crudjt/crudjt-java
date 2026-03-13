@@ -69,18 +69,18 @@ public class TestCRUDJT {
         Map<String, Object> expectedEdData = new HashMap<>();
         expectedEdData.put("data", edData);
 
-        String token = CRUDJT.create(data, -1, -1);
+        String token = CRUDJT.create(data, null, null);
 
         System.out.println(CRUDJT.read(token).toString().equals(expectedData.toString()));
-        System.out.println(CRUDJT.update(token, edData, -1, -1));
+        System.out.println(CRUDJT.update(token, edData, null, null));
         System.out.println(CRUDJT.read(token).toString().equals(expectedEdData.toString()));
         System.out.println(CRUDJT.delete(token));
         System.out.println(CRUDJT.read(token) == null);
 
         // with ttl
         System.out.println("Checking ttl...");
-        long ttl = 5;
-        String tokenWithttl = CRUDJT.create(data, ttl, -1);
+        long ttl = 5L;
+        String tokenWithttl = CRUDJT.create(data, ttl, null);
 
         long expectedttl = ttl;
         for (int i = 0; i < ttl; i++) {
@@ -93,19 +93,19 @@ public class TestCRUDJT {
 
         // when expired ttl
         System.out.println("when expired ttl");
-        ttl = 1;
-        token = CRUDJT.create(data, ttl, -1);
+        ttl = 1L;
+        token = CRUDJT.create(data, ttl, null);
         TimeUnit.SECONDS.sleep(ttl);
         System.out.println(CRUDJT.read(token) == null);
-        System.out.println(!CRUDJT.update(token, data, -1, -1));
+        System.out.println(!CRUDJT.update(token, data, null, null));
         System.out.println(!CRUDJT.delete(token));
-        System.out.println(!CRUDJT.update(token, data, -1, -1));
+        System.out.println(!CRUDJT.update(token, data, null, null));
         System.out.println(CRUDJT.read(token) == null);
 
         // with silence_read
         System.out.println("Checking silence_read...");
-        long silence_read = 6;
-        String tokenWithsilence_read = CRUDJT.create(data, -1, silence_read);
+        long silence_read = 6L;
+        String tokenWithsilence_read = CRUDJT.create(data, null, silence_read);
 
         long expectedsilence_read = silence_read - 1;
         for (int i = 0; i < silence_read; i++) {
@@ -117,8 +117,8 @@ public class TestCRUDJT {
         System.out.println(CRUDJT.read(tokenWithsilence_read) == null);
 
         // with ttl and silence_read
-        ttl = 5;
-        silence_read = 5;
+        ttl = 5L;
+        silence_read = 5L;
         System.out.println("Checking ttl and silence_read...");
         String tokenWithttlAndsilence_read = CRUDJT.create(data, ttl, silence_read);
 
@@ -157,7 +157,7 @@ public class TestCRUDJT {
             start = System.nanoTime();
             String[] tokens = new String[REQUESTS];
             for (int j = 0; j < REQUESTS; j++) {
-                tokens[j] = CRUDJT.create(data, -1, -1);
+                tokens[j] = CRUDJT.create(data, null, null);
             }
             end = System.nanoTime();
             System.out.printf("Elapsed time: %.3f seconds\n", (end - start) / 1e9);
@@ -176,7 +176,7 @@ public class TestCRUDJT {
             System.out.println("when updates 40k tokens");
             start = System.nanoTime();
             for (int j = 0; j < REQUESTS; j++) {
-                CRUDJT.update(tokens[j], edData, -1, -1);
+                CRUDJT.update(tokens[j], edData, null, null);
             }
             end = System.nanoTime();
             System.out.printf("Elapsed time: %.3f seconds\n", (end - start) / 1e9);
@@ -195,11 +195,11 @@ public class TestCRUDJT {
         List<String> previusValues = new ArrayList<>();
 
         for (int i = 0; i < REQUESTS; i++) {
-            previusValues.add(CRUDJT.create(data, -1, -1));
+            previusValues.add(CRUDJT.create(data, null, null));
         }
 
         for (int i = 0; i < REQUESTS; i++) {
-            CRUDJT.create(data, -1, -1);
+            CRUDJT.create(data, null, null);
         }
 
         for (int i = 0; i < READY_FOR_CACHE; i++) {
