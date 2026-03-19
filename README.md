@@ -14,7 +14,7 @@
   </a>
 </p>
 
-> ⚠️ Version 1.0.0-beta — production testing phase   
+> ⚠️ Version 1.0.0-SNAPSHOT — production testing phase   
 > API is stable. Feedback is welcome before the final 1.0.0 release
 
 Fast B-tree–backed token store for stateful user sessions  
@@ -26,6 +26,14 @@ Optimized for vertical scaling on a single server
 ## Gradle
 
 ```txt
+repositories {
+    mavenCentral()
+
+    maven {
+        url = "https://central.sonatype.com/repository/maven-snapshots/"
+    }
+}
+
 dependencies {
   implementation 'com.crudjt:crudjt-java:1.0.0-SNAPSHOT'
 }
@@ -67,7 +75,7 @@ CRUDJT.Config.startMaster(
 *Important: Use the same `secret_key` across all sessions. If the key changes, previously stored tokens cannot be decrypted and will return `null` or `false`*  
 
 ## Start CRUDJT master in Docker
-> `docker-compose.yml` will be published after 1.0.0-beta Docker image builds
+> `docker-compose.yml` will be published after 1.0.0-SNAPSHOT Docker image builds
 
 ## Connect to an existing CRUDJT master
 
@@ -158,12 +166,12 @@ boolean result = CRUDJT.delete("HBmKFXoXgJ46mCqer1WXyQ");
 ```
 
 # Performance
-> Metrics will be published after 1.0.0-beta GitHub Actions builds
+> Metrics will be published after 1.0.0-SNAPSHOT GitHub Actions builds
 
 # Storage (File-backed)  
 
 ## Disk footprint  
-> Metrics will be published after 1.0.0-beta GitHub Actions builds
+> Metrics will be published after 1.0.0-SNAPSHOT GitHub Actions builds
 
 ## Path Lookup Order
 Stored tokens are placed in the **file system** according to the following order

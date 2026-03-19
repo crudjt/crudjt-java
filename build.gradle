@@ -59,7 +59,7 @@ publishing {
             artifactId = 'crudjt-java'
 
             pom {
-                name = 'restJT Library'
+                name = 'CRUDJT Library'
                 description = 'Fast B-tree–backed token store for stateful sessions'
                 url = 'https://github.com/crudjt/crudjt-java'
                 licenses {
