@@ -6,10 +6,11 @@ plugins {
     id 'java'
     id 'maven-publish'
     id "com.google.protobuf" version "0.9.4"
+    id 'signing'
 }
 
 group = 'com.crudjt'
-version = '1.0.0-beta.0'
+version = '1.0.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -56,6 +57,41 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifactId = 'crudjt-java'
+
+            pom {
+                name = 'restJT Library'
+                description = 'Fast B-tree–backed token store for stateful sessions'
+                url = 'https://github.com/crudjt/crudjt-java'
+                licenses {
+                    license {
+                        name = 'The MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'coffeemainer'
+                        name = 'Vlad Akymov'
+                        email = 'support@crudjt.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/crudjt/crudjt-java.git'
+                    developerConnection = 'scm:git:ssh://github.com/crudjt/crudjt-java.git'
+                    url = 'https://github.com/crudjt/crudjt-java'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+            credentials {
+                username = findProperty("ossrhUsername")
+                password = findProperty("ossrhPassword")
+            }
         }
     }
 }
