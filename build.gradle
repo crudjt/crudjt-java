@@ -8,7 +8,7 @@ plugins {
     id "com.google.protobuf" version "0.9.4"
 }
 
-group = 'com.github.crudjt'
+group = 'com.crudjt'
 version = '1.0.0-beta.0'
 
 repositories {

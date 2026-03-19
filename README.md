@@ -27,7 +27,7 @@ Optimized for vertical scaling on a single server
 
 ```txt
 dependencies {
-  implementation 'com.github.crudjt:crudjt-java:1.0.0-beta.0'
+  implementation 'com.crudjt:crudjt-java:1.0.0-beta.0'
 }
 ```
 
