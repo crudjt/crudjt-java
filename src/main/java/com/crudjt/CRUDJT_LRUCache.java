@@ -2,6 +2,8 @@
 // Generated using ChatGPT (GPT-5) from the canonical Ruby SDK
 // API is stable and production-ready
 
+package com.crudjt;
+
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;

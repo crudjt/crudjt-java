@@ -2,6 +2,8 @@
 // Generated using ChatGPT (GPT-5) from the canonical Ruby SDK
 // API is stable and production-ready
 
+package com.crudjt;
+
 import token.TokenServiceGrpc;
 
 import io.grpc.stub.StreamObserver;

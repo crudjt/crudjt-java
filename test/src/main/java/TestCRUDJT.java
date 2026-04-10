@@ -18,6 +18,8 @@ import java.io.IOException;
 
 import java.util.Objects;
 
+import com.crudjt.CRUDJT;
+
 public class TestCRUDJT {
     public static final int REQUESTS = 40_000;
     private static final int READY_FOR_CACHE = 2;

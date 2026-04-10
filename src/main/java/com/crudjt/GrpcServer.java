@@ -2,6 +2,8 @@
 // Generated using ChatGPT (GPT-5) from the canonical Ruby SDK
 // API is stable and production-ready
 
+package com.crudjt;
+
 import io.grpc.Server;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import java.io.IOException;

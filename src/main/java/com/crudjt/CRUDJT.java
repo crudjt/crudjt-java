@@ -2,6 +2,8 @@
 // Generated using ChatGPT (GPT-5) from the canonical Ruby SDK
 // API is stable and production-ready
 
+package com.crudjt;
+
 import jnr.ffi.LibraryLoader;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageBufferPacker;
