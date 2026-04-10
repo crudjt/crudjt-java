@@ -39,6 +39,27 @@ dependencies {
 }
 ```
 
+## Maven
+```xml
+<repositories>
+    <repository>
+        <id>sonatype-snapshots</id>
+        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>com.crudjt</groupId>
+        <artifactId>crudjt-java</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+</dependencies>
+```
+
 ## How to use
 
 - One process starts the master
@@ -64,6 +85,8 @@ export CRUDJT_SECRET_KEY=$(openssl rand -base64 48)
 ### Start master (java)
 
 ```java
+import com.crudjt.CRUDJT;
+
 CRUDJT.Config.startMaster(
     Map.of(
         "secret_key", System.getenv("CRUDJT_SECRET_KEY"),
@@ -115,6 +138,8 @@ Typical examples:
 - forked processes
 
 ```java
+import com.crudjt.CRUDJT;
+
 CRUDJT.Config.connectToMaster(
     Map.of(
         "grpc_host", "127.0.0.1", // default
@@ -134,7 +159,7 @@ App boot
 
 ```java
 Map<String, Object> data = Map.of("user_id", 42, "role", 11); // required
-long ttl = 3600 * 24 * 30 // optional: token lifetime (seconds)
+long ttl = 3600 * 24 * 30; // optional: token lifetime (seconds)
 
 // Optional: read limit
 // Each read decrements the counter
@@ -168,7 +193,7 @@ String token = CRUDJT.read("HBmKFXoXgJ46mCqer1WXyQ");
 ```java
 Map<String, Object> data = Map.of("user_id", 42, "role", 8);
 // `null` disables limits
-long ttl = 600
+long ttl = 600;
 long silenceRead = 100;
 
 boolean result = CRUDJT.update("HBmKFXoXgJ46mCqer1WXyQ", data, ttl, silenceRead);
