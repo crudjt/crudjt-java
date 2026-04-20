@@ -26,38 +26,16 @@ Optimized for vertical scaling on a single server
 ## Gradle
 
 ```txt
-repositories {
-    mavenCentral()
-
-    maven {
-        url = "https://central.sonatype.com/repository/maven-snapshots/"
-    }
-}
-
-dependencies {
-  implementation 'com.crudjt:crudjt-java:1.0.0-SNAPSHOT'
-}
+implementation("com.crudjt:crudjt:1.0.0")
 ```
 
 ## Maven
 ```xml
-<repositories>
-    <repository>
-        <id>sonatype-snapshots</id>
-        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-</repositories>
-
-<dependencies>
-    <dependency>
-        <groupId>com.crudjt</groupId>
-        <artifactId>crudjt-java</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-</dependencies>
+<dependency>
+    <groupId>com.crudjt</groupId>
+    <artifactId>crudjt</artifactId>
+    <version>1.0.0</version>
+</dependency>
 ```
 
 ## How to use
