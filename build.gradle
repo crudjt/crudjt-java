@@ -5,12 +5,12 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id "com.google.protobuf" version "0.9.4"
+    id 'com.google.protobuf' version '0.9.4'
     id 'signing'
 }
 
 group = 'com.crudjt'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -28,10 +28,10 @@ dependencies {
 
     implementation "com.google.protobuf:protobuf-java:3.25.3"
 
-    compileOnly "org.apache.tomcat:annotations-api:6.0.53" // @Generated
+    compileOnly "org.apache.tomcat:annotations-api:6.0.53"
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -42,8 +42,8 @@ tasks.withType(Jar).configureEach {
 jar {
     manifest {
         attributes(
-            'Implementation-Title': 'CRUDJT Library',
-            'Implementation-Version': version
+                'Implementation-Title': 'CRUDJT Library',
+                'Implementation-Version': version
         )
     }
 
@@ -52,48 +52,9 @@ jar {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifactId = 'crudjt-java'
-
-            pom {
-                name = 'CRUDJT Library'
-                description = 'Fast B-tree–backed token store for stateful sessions'
-                url = 'https://github.com/crudjt/crudjt-java'
-                licenses {
-                    license {
-                        name = 'The MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'coffeemainer'
-                        name = 'Vlad Akymov'
-                        email = 'support@crudjt.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/crudjt/crudjt-java.git'
-                    developerConnection = 'scm:git:ssh://github.com/crudjt/crudjt-java.git'
-                    url = 'https://github.com/crudjt/crudjt-java'
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            name = "OSSRH"
-            url = 'https://central.sonatype.com/repository/maven-snapshots/'
-            credentials {
-                username = findProperty("ossrhUsername")
-                password = findProperty("ossrhPassword")
-            }
-        }
-    }
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 protobuf {
@@ -114,7 +75,43 @@ protobuf {
     }
 }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifactId = 'crudjt-java'
+
+            pom {
+                name = 'CRUDJT Library'
+                description = 'Fast B-tree–backed token store for stateful sessions'
+                url = 'https://github.com/crudjt/crudjt-java'
+
+                licenses {
+                    license {
+                        name = 'The MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'coffeemainer'
+                        name = 'Vlad Akymov'
+                        email = 'support@crudjt.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/crudjt/crudjt-java.git'
+                    developerConnection = 'scm:git:ssh://github.com/crudjt/crudjt-java.git'
+                    url = 'https://github.com/crudjt/crudjt-java'
+                }
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
 }
