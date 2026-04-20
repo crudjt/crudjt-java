@@ -80,7 +80,7 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
 
-            artifactId = 'crudjt-java'
+            artifactId = 'crudjt'
 
             pom {
                 name = 'CRUDJT Library'
