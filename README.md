@@ -80,7 +80,7 @@ Create a `docker-compose.yml` file:
 ```yml
 services:
   crudjt-server:
-    image: crudjt/crudjt-server:beta
+    image: crudjt/crudjt-server:latest
     restart: unless-stopped
 
     ports:
